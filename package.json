@@ -26,5 +26,17 @@
     "tailwindcss": "^3.1.8",
     "typescript": "^4.6.4",
     "vite": "^3.0.0"
-  }
+  },
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aCodeYogi/my-tv-shows.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/aCodeYogi/my-tv-shows/issues"
+  },
+  "homepage": "https://github.com/aCodeYogi/my-tv-shows#readme",
+  "description": ""
 }
