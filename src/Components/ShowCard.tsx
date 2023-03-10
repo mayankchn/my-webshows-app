@@ -1,28 +1,31 @@
-import { Link } from "react-router-dom";
+import { FC } from "react";
+import { Link, useParams } from "react-router-dom";
+import { Show } from "../models";
 
-function ShowCard() {
+type ShowCardProps = {
+  show:Show;
+}
+
+const placeHolderSummary = "Lorem ipsum dolor sit, amet consectetur adipisicing elit. Quam et eligendi, necessitatibus voluptatum consequatur harum dolore ex corrupti eaque, saepe maiores optio? Minima optio dignissimos, quam laudantium voluptate officiis fuga."
+
+const placeHolderImage = "https://images.unsplash.com/photo-1515787366009-7cbdd2dc587b?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80"
+
+const ShowCard:FC<ShowCardProps> = ({show}) => {
   return (
-    <div className="max-w-xs rounded-md shadow-md p-2 m-1">
+    <div className="flex flex-col gap-2 p-2 max-w-sm rounded-md shadow-md">
       <img
-        src="https://static.tvmaze.com/uploads/images/medium_portrait/423/1058422.jpg"
-        alt=""
-        className="object-cover object-center w-full rounded-t-md h-72"
+        src={show.image?.medium || show.image?.original || placeHolderImage}
+        alt={show.name}
+        className="object-cover object-center aspect-square w-full rounded-t-md h-72"
       />
-      <div className="flex flex-col justify-between p-6 space-y-8">
+      <div className="h-full flex flex-col justify-between px-2 gap-1">
         <div className="space-y-2">
-          <h2 className="text-3xl font-semibold tracking-wide">The Witcher</h2>
-          <p>
-            Based on the best-selling fantasy series, The Witcher is an epic
-            tale of fate and family. Geralt of Rivia, a solitary monster hunter,
-            struggles to find his place in a world where people often prove more
-            wicked than beasts. But when destiny hurtles him toward a powerful
-            sorceress, and a young princess with a dangerous secret, the three
-            must learn to navigate the increasingly volatile Continent together.
-          </p>
+          <h2 className="text-3xl font-semibold tracking-wide">{show.name}</h2>
+          <p>{show.summary || placeHolderSummary}</p>
         </div>
         <Link
-          to="/show/1"
-          className="flex items-center justify-center w-full p-3 font-semibold tracking-wide rounded-md"
+          to={"/show/"+show.id}
+          className="font-semibold tracking-wide uppercase text-sm text-gray-500 bg-gray-200 rounded-md p-3 w-full text-center"
         >
           View Details
         </Link>
@@ -30,5 +33,5 @@ function ShowCard() {
     </div>
   );
 }
-
+ShowCard.defaultProps={};
 export default ShowCard;
