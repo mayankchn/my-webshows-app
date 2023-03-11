@@ -1,34 +1,41 @@
 import SearchBar from "../Components/SearchBar";
 import ShowCard from "../Components/ShowCard";
-import {useState,useEffect} from "react"
-import { searchShows } from "../api";
+import {useState, FC} from "react"
 import { Show } from "../models";
 import LoadingSpinner from "../Components/LoadingSpinner";
+import { State } from "../store";
+import { showsLoadedAction, showsQueryChangeAction } from "../actions/shows";
+import { connect } from "react-redux";
+import { showsQuerySelector, showsSelector } from "../selectors/shows";
 
-function ShowListPage() {
-  const [query,setQuery] = useState<string>("")
-  const [loading, setLoading] = useState<boolean>(true)
-  const [shows,setShows] = useState<Show[]>([])
+type ShowListPageProps = {
+  showsLoaded:(shows:Show[])=>void;
+  showsQueryChange:(query:string)=>void;
+  query:string;
+  shows:Show[];
+}
 
-  console.log('shows: ',shows)
+const ShowListPage:FC<ShowListPageProps> = ({showsQueryChange,query,shows}) => {
+  // const [query,setQuery] = useState<string>("")
+  // const [loading, setLoading] = useState<boolean>(true)
+  // const [shows,setShows] = useState<Show[]>([])
 
   const handleOnChange = (e:any) => {
-    setQuery(e.target.value)
+    showsQueryChange(e.target.value)
   }
 
-  useEffect(()=>{
-    searchShows(query).then((items)=>{
-      setShows(items)
-      setLoading(false)
-    }).catch((error)=>{
-      setShows([])
-      setLoading(false)
-    })
-  },[query])
+  // useEffect(()=>{
+  //   searchShows(query).then((items)=>{
+  //     showsLoaded(items)
+  //     setLoading(false)
+  //   }).catch((error)=>{
+  //     setLoading(false)
+  //   })
+  // },[query])
   
-  if(loading){
-    return <LoadingSpinner className=""/>
-  }
+  // if(loading){
+  //   return <LoadingSpinner className=""/>
+  // }
 
   return (
     <div className="mt-2">
@@ -42,4 +49,16 @@ function ShowListPage() {
   );
 }
 
-export default ShowListPage;
+const mapStateToProps = (state:State) => {
+  return {
+      query:showsQuerySelector(state),
+      shows:showsSelector(state),
+  }
+}
+
+const mapDispatchToProps = {
+  // showsLoaded:showsLoadedAction,
+  showsQueryChange:showsQueryChangeAction,
+}
+
+export default connect(mapStateToProps,mapDispatchToProps)(ShowListPage);

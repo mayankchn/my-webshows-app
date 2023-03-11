@@ -1,13 +1,17 @@
 import { FC, useState, useEffect } from "react";
+import { connect, ConnectedProps } from "react-redux";
 import { Link } from "react-router-dom";
+import { showCastLoadedAction, showDetailLoadedAction } from "../actions/shows";
 import { getCast, getShow } from "../api";
 import CastCard from "../Components/CastCard";
 import GenrePill from "../Components/GenrePill";
 import LoadingSpinner from "../Components/LoadingSpinner";
 import withRouter, { WithRouterProps } from "../hocs/withRouter";
-import { Cast, Show } from "../models/index";
+import { showCastSelector, showSelector, showsSelector } from "../selectors/shows";
+import { State } from "../store";
 
-type ShowDetailPageProps = WithRouterProps;
+type OwnProps = WithRouterProps;
+type ShowDetailPageProps = ReduxProps & OwnProps
 
 const placeHolderSummary = "Lorem ipsum dolor sit, amet consectetur adipisicing elit. Quam et eligendi, necessitatibus voluptatum consequatur harum dolore ex corrupti eaque, saepe maiores optio? Minima optio dignissimos, quam laudantium voluptate officiis fuga."
 
@@ -15,38 +19,42 @@ const placeHolderImage = "https://images.unsplash.com/photo-1515787366009-7cbdd2
 
 const placeHolderImageCast = "https://cdn-icons-png.flaticon.com/512/225/225238.png?w=740&t=st=1678183245~exp=1678183845~hmac=ae8ef0a4a605546ce737e4697098fa063cc4c54d6b6a011df4933b5ff5b426cd"
 
-const ShowDetailPage: FC<WithRouterProps> = ({ params }) => {
-  const id = +params.show_id;
+const ShowDetailPage: FC<ShowDetailPageProps> = ({ id, shows, show, cast, showDetailLoaded, showCastLoaded }) => {
 
-  const [show,setShow] = useState<Show>({})
-  const [cast,setCast] = useState<Cast[]>([])
+  // const [show, setShow] = useState<Show>({})
+  // const [cast, setCast] = useState<Cast[]>([])
   // console.log('show is ',show)
-  console.log('cast is ',cast)
-  const [showLoading,setShowLoading] = useState<boolean>(true)
-  const [castLoading,setCastLoading] = useState<boolean>(true)
+  // console.log('cast is ', cast)
+  
+  const [showLoading, setShowLoading] = useState<boolean>(true)
+  const [castLoading, setCastLoading] = useState<boolean>(true)
 
-  useEffect(()=>{
-    getShow(id).then((item)=>{
-      setShow(item)
+  useEffect(() => {
+    getShow(id).then((item) => {
+      showDetailLoaded(item)
       setShowLoading(false)
-    }).catch((error)=>{
-      setShow({})
+    }).catch((error) => {
+      // setShow({})
       setShowLoading(false)
     })
 
-    getCast(id).then((item)=>{
-      setCast(item)
+    getCast(id).then((item) => {
+      showCastLoaded(item)
       setCastLoading(false)
-    }).catch((error)=>{
-      setCast([])
+    }).catch((error) => {
       setCastLoading(false)
     })
-    
-  },[id])
 
+  }, [id])
 
-  if(showLoading){
-    return <LoadingSpinner className=""/>
+  // const sh = shows.find((item)=>{
+  //   // console.log(item)
+  //   return item.id===id
+  // }) || {}
+// console.log('sh ',sh)
+
+  if (showLoading) {
+    return <LoadingSpinner className="" />
   }
 
   return (
@@ -54,7 +62,7 @@ const ShowDetailPage: FC<WithRouterProps> = ({ params }) => {
       <Link to="/" className="underline text-red-500 font-medium self-start">Back</Link>
       <h2 className="text-4xl font-semibold tracking-wide">{show.name}</h2>
       <div className="flex gap-2 bg-gray-300 px-1 py-2 rounded-sm items-center">
-        {show.genres.map((genre)=>{
+        {show.genres.map((genre) => {
           return <GenrePill key={genre} name={genre} />
         })}
       </div>
@@ -75,13 +83,29 @@ const ShowDetailPage: FC<WithRouterProps> = ({ params }) => {
       <div className="flex flex-col gap-1">
         <h4 className="text-2xl font-semibold tracking-wide">Cast</h4>
         <div className="flex flex-wrap gap-1">
-          {cast ? cast.map((item)=>{
+          {castLoading ? <LoadingSpinner /> : cast.map((item) => {
             return <CastCard key={item.id} avatarLink={item.image?.medium || item.image?.original || placeHolderImageCast} name={item.name} />
-          }):<LoadingSpinner />}
+          })}
         </div>
       </div>
     </div>
   );
 };
 
-export default withRouter(ShowDetailPage);
+const mapStateToProps = (state: State, ownProps: OwnProps) => {
+  const id = +ownProps.params.show_id
+  return {
+    id,
+    shows:showsSelector(state),
+    show:showSelector(state)!,
+    cast:showCastSelector(state),
+  }
+}
+const mapDispatchToProps = {
+  showDetailLoaded:showDetailLoadedAction,
+  showCastLoaded:showCastLoadedAction,
+}
+const connector = connect(mapStateToProps, mapDispatchToProps)
+type ReduxProps = ConnectedProps<typeof connector>
+
+export default withRouter(connector(ShowDetailPage));
