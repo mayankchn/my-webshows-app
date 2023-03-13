@@ -1,41 +1,18 @@
 import SearchBar from "../Components/SearchBar";
 import ShowCard from "../Components/ShowCard";
-import {useState, FC} from "react"
-import { Show } from "../models";
-import LoadingSpinner from "../Components/LoadingSpinner";
+import {FC} from "react"
 import { State } from "../store";
-import { showsLoadedAction, showsQueryChangeAction } from "../actions/shows";
-import { connect } from "react-redux";
+import { showsQueryChangeAction } from "../actions/shows";
+import { connect, ConnectedProps } from "react-redux";
 import { showsQuerySelector, showsSelector } from "../selectors/shows";
 
-type ShowListPageProps = {
-  showsLoaded:(shows:Show[])=>void;
-  showsQueryChange:(query:string)=>void;
-  query:string;
-  shows:Show[];
-}
+type ShowListPageProps = {} & ReduxProps
 
 const ShowListPage:FC<ShowListPageProps> = ({showsQueryChange,query,shows}) => {
-  // const [query,setQuery] = useState<string>("")
-  // const [loading, setLoading] = useState<boolean>(true)
-  // const [shows,setShows] = useState<Show[]>([])
 
   const handleOnChange = (e:any) => {
     showsQueryChange(e.target.value)
   }
-
-  // useEffect(()=>{
-  //   searchShows(query).then((items)=>{
-  //     showsLoaded(items)
-  //     setLoading(false)
-  //   }).catch((error)=>{
-  //     setLoading(false)
-  //   })
-  // },[query])
-  
-  // if(loading){
-  //   return <LoadingSpinner className=""/>
-  // }
 
   return (
     <div className="mt-2">
@@ -57,8 +34,10 @@ const mapStateToProps = (state:State) => {
 }
 
 const mapDispatchToProps = {
-  // showsLoaded:showsLoadedAction,
   showsQueryChange:showsQueryChangeAction,
 }
 
-export default connect(mapStateToProps,mapDispatchToProps)(ShowListPage);
+const connector = connect(mapStateToProps,mapDispatchToProps)
+type ReduxProps = ConnectedProps<typeof connector>
+
+export default connector(ShowListPage);

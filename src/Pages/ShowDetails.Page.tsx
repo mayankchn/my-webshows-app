@@ -1,8 +1,7 @@
-import { FC, useState, useEffect } from "react";
+import { FC, useEffect } from "react";
 import { connect, ConnectedProps } from "react-redux";
 import { Link } from "react-router-dom";
-import { showCastLoadedAction, showDetailLoadedAction } from "../actions/shows";
-import { getCast, getShow } from "../api";
+import { showIdChangeAction } from "../actions/shows";
 import CastCard from "../Components/CastCard";
 import GenrePill from "../Components/GenrePill";
 import LoadingSpinner from "../Components/LoadingSpinner";
@@ -19,42 +18,14 @@ const placeHolderImage = "https://images.unsplash.com/photo-1515787366009-7cbdd2
 
 const placeHolderImageCast = "https://cdn-icons-png.flaticon.com/512/225/225238.png?w=740&t=st=1678183245~exp=1678183845~hmac=ae8ef0a4a605546ce737e4697098fa063cc4c54d6b6a011df4933b5ff5b426cd"
 
-const ShowDetailPage: FC<ShowDetailPageProps> = ({ id, shows, show, cast, showDetailLoaded, showCastLoaded }) => {
-
-  // const [show, setShow] = useState<Show>({})
-  // const [cast, setCast] = useState<Cast[]>([])
-  // console.log('show is ',show)
-  // console.log('cast is ', cast)
-  
-  const [showLoading, setShowLoading] = useState<boolean>(true)
-  const [castLoading, setCastLoading] = useState<boolean>(true)
+const ShowDetailPage: FC<ShowDetailPageProps> = ({ id, show, cast, showIdChange }) => {
 
   useEffect(() => {
-    getShow(id).then((item) => {
-      showDetailLoaded(item)
-      setShowLoading(false)
-    }).catch((error) => {
-      // setShow({})
-      setShowLoading(false)
-    })
-
-    getCast(id).then((item) => {
-      showCastLoaded(item)
-      setCastLoading(false)
-    }).catch((error) => {
-      setCastLoading(false)
-    })
-
+    showIdChange(id)
   }, [id])
 
-  // const sh = shows.find((item)=>{
-  //   // console.log(item)
-  //   return item.id===id
-  // }) || {}
-// console.log('sh ',sh)
-
-  if (showLoading) {
-    return <LoadingSpinner className="" />
+  if (!show) {
+    return <LoadingSpinner />
   }
 
   return (
@@ -66,14 +37,14 @@ const ShowDetailPage: FC<ShowDetailPageProps> = ({ id, shows, show, cast, showDe
           return <GenrePill key={genre} name={genre} />
         })}
       </div>
-      <div className="flex flex-col max-w-xl mx-auto sm:flex-row sm:max-w-5xl">
+      <div className="flex flex-col max-w-xl mx-auto gap-2 sm:flex-row sm:max-w-5xl">
         <img
           src={show.image?.medium || show.image?.original || placeHolderImage}
           alt=""
           className="object-cover object-center w-full aspect-square rounded-t-md h-full sm:h-72"
         />
         <div className="">
-          <p>{show.summary || placeHolderSummary}</p>
+          <p dangerouslySetInnerHTML={{ __html: show.summary || placeHolderSummary }}></p>
           <p className="mt-2 text-lg font-bold border border-gray-700 rounded-md px-2 py-1 max-w-max">
             Rating: {show.rating?.average ? <span className="text-gray-700">{show.rating.average}/10</span> : <span className="text-base font-semibold">not available</span>}
           </p>
@@ -83,7 +54,7 @@ const ShowDetailPage: FC<ShowDetailPageProps> = ({ id, shows, show, cast, showDe
       <div className="flex flex-col gap-1">
         <h4 className="text-2xl font-semibold tracking-wide">Cast</h4>
         <div className="flex flex-wrap gap-1">
-          {castLoading ? <LoadingSpinner /> : cast.map((item) => {
+          {cast.map((item) => {
             return <CastCard key={item.id} avatarLink={item.image?.medium || item.image?.original || placeHolderImageCast} name={item.name} />
           })}
         </div>
@@ -96,14 +67,13 @@ const mapStateToProps = (state: State, ownProps: OwnProps) => {
   const id = +ownProps.params.show_id
   return {
     id,
-    shows:showsSelector(state),
-    show:showSelector(state)!,
-    cast:showCastSelector(state),
+    shows: showsSelector(state),
+    show: showSelector(state)!,
+    cast: showCastSelector(state),
   }
 }
 const mapDispatchToProps = {
-  showDetailLoaded:showDetailLoadedAction,
-  showCastLoaded:showCastLoadedAction,
+  showIdChange: showIdChangeAction,
 }
 const connector = connect(mapStateToProps, mapDispatchToProps)
 type ReduxProps = ConnectedProps<typeof connector>

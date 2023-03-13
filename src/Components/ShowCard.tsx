@@ -21,7 +21,7 @@ const ShowCard:FC<ShowCardProps> = ({show}) => {
       <div className="h-full flex flex-col justify-between px-2 gap-1">
         <div className="space-y-2">
           <h2 className="text-3xl font-semibold tracking-wide">{show.name}</h2>
-          <p>{show.summary || placeHolderSummary}</p>
+          <p dangerouslySetInnerHTML={{__html:show.summary || placeHolderSummary}}></p>
         </div>
         <Link
           to={"/show/"+show.id}
