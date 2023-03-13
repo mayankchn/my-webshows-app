@@ -6,7 +6,7 @@ import CastCard from "../Components/CastCard";
 import GenrePill from "../Components/GenrePill";
 import LoadingSpinner from "../Components/LoadingSpinner";
 import withRouter, { WithRouterProps } from "../hocs/withRouter";
-import { showCastSelector, showSelector, showsSelector } from "../selectors/shows";
+import { showCastLoadingSelector, showCastSelector, showLoadingSelector, showsMapSelector } from "../selectors/shows";
 import { State } from "../store";
 
 type OwnProps = WithRouterProps;
@@ -18,14 +18,26 @@ const placeHolderImage = "https://images.unsplash.com/photo-1515787366009-7cbdd2
 
 const placeHolderImageCast = "https://cdn-icons-png.flaticon.com/512/225/225238.png?w=740&t=st=1678183245~exp=1678183845~hmac=ae8ef0a4a605546ce737e4697098fa063cc4c54d6b6a011df4933b5ff5b426cd"
 
-const ShowDetailPage: FC<ShowDetailPageProps> = ({ id, show, cast, showIdChange }) => {
+const ShowDetailPage: FC<ShowDetailPageProps> = ({ id, show, cast, showIdChange, show_loading, cast_loading }) => {
 
   useEffect(() => {
     showIdChange(id)
   }, [id])
 
-  if (!show) {
-    return <LoadingSpinner />
+  if (show_loading) {
+    return (
+      <div className="flex max-w-screen-2xl mx-auto items-center justify-center h-screen">
+        <LoadingSpinner />
+      </div>
+    )
+  }
+
+  if(!show){
+    return (
+      <div className="flex max-w-screen-2xl mx-auto items-center justify-center h-screen">
+        <LoadingSpinner />
+      </div>
+    )
   }
 
   return (
@@ -52,12 +64,12 @@ const ShowDetailPage: FC<ShowDetailPageProps> = ({ id, show, cast, showIdChange 
       </div>
 
       <div className="flex flex-col gap-1">
-        <h4 className="text-2xl font-semibold tracking-wide">Cast</h4>
-        <div className="flex flex-wrap gap-1">
+        {cast.length > 0 && <h4 className="text-2xl font-semibold tracking-wide">Cast</h4>}
+        {cast_loading ? <LoadingSpinner /> : <div className="flex flex-wrap gap-1">
           {cast.map((item) => {
             return <CastCard key={item.id} avatarLink={item.image?.medium || item.image?.original || placeHolderImageCast} name={item.name} />
           })}
-        </div>
+        </div>}
       </div>
     </div>
   );
@@ -67,9 +79,10 @@ const mapStateToProps = (state: State, ownProps: OwnProps) => {
   const id = +ownProps.params.show_id
   return {
     id,
-    shows: showsSelector(state),
-    show: showSelector(state)!,
+    show: showsMapSelector(state)[id],
     cast: showCastSelector(state),
+    show_loading: showLoadingSelector(state),
+    cast_loading: showCastLoadingSelector(state),
   }
 }
 const mapDispatchToProps = {

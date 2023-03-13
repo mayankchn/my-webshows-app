@@ -13,14 +13,14 @@ export const showsMapSelector = createSelector(showsStateSelector,(showsState)=>
     return showsState.shows;
 })
 
-export const showsSelector = createSelector(showsMapSelector,(showsMap)=>{
-    return Object.keys(showsMap).map((id)=>{
-        return showsMap[+id]
-    })
+export const queryShowsMapSelector = createSelector(showsStateSelector,(showsState)=>{
+    return showsState.query_shows
 })
 
-export const showSelector = createSelector(showsStateSelector,(showsState)=>{
-    return showsState.showDetail
+export const showsSelector = createSelector(showsMapSelector,queryShowsMapSelector,showsQuerySelector,(showsMap,queryShowsMap,query)=>{
+    return queryShowsMap[query]?.map((id)=>{
+        return showsMap[+id] 
+    })
 })
 
 export const showCastMapSelector = createSelector(showsStateSelector,(showsState)=>{
@@ -33,3 +33,14 @@ export const showCastSelector = createSelector(showCastMapSelector,(showCastMap)
     })
 })
 
+export const showsLoadingSelector = createSelector(showsStateSelector,(showsState)=>{
+    return showsState.loading
+})
+
+export const showLoadingSelector = createSelector(showsStateSelector,(showsState)=>{
+    return showsState.show_loading
+})
+
+export const showCastLoadingSelector = createSelector(showsStateSelector,(showsState)=>{
+    return showsState.cast_loading
+})
